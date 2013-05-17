@@ -14,6 +14,14 @@
         <h1>Into Your Dream</h1>
         <h2>subtitle</h2>
       </hgroup>
+
+      <nav>
+        <ul>
+          <li>{{#linkTo 'dreams'}}dreams{{/linkTo}}</li>
+          <li>{{#linkTo 'write'}}write{{/linkTo}}</li>
+          <li>{{#linkTo 'moderate'}}moderate{{/linkTo}}</li>
+        </ul>
+      </nav>
     </header>
 
     {{outlet}}
@@ -23,19 +31,81 @@
     </footer>
   </script>
 
+  <script type="text/x-handlebars" data-template-name="write">
+    <p>{{view Ember.TextArea valueBinding="dream"}}</p>
+    <p>{{view Ember.TextField valueBinding="pseudo"}}</p>
+    <p>{{view Ember.Select contentBinding="App.genre" valueBinding="sex"}}</p>
+    <button {{action 'submit'}}>Create</button>
+    {{#if errorState}}
+    <p>Please fill-out every fields.</p>
+    {{/if}}
+  </script>
+
   <script type="text/x-handlebars" data-template-name="dreams">
     <section class="dreams-list">
-    {{#each model}}
-      <article class="dream">
-        {{dream}}
-        <footer>
-          <p>{{pseudo}}</p>
-        </footer>
-      </article>
+    {{#each model itemController="dream"}}
+      {{partial 'dream'}}
     {{else}}
       <p>Sorry, no dreams available.</p>
     {{/each}}
     </section>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="moderate">
+    {{#if currentDream}}
+    <section class="moderation-box">
+      <header>
+        <p class="author">{{currentDream.author}}</p>
+        <p class="sex">{{currentDream.sex}}</p>
+      </header>
+      <p>{{currentDream.dream}}</p>
+      <footer>
+        <button {{action 'validateDream'}}>Yes</button>
+        <button {{action 'refuseDream'}}>No</button>
+      </footer>
+    </section>
+    {{else}}
+    No dream to moderate.
+    {{/if}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="dream">
+    {{partial 'dream'}}
+
+    <section class="comments">
+      <section class="post-comments">
+        {{view Ember.TextArea valueBinding="comment_message"}}
+        {{view Ember.TextField valueBinding="comment_author"}}
+        <button {{action 'postComment'}}>Create</button>
+        {{#if errorComment}}
+          <p class="error">Fill in your pseudo and the comment.</p>
+        {{/if}}
+      </section>
+
+      {{#each fetchedComments}}
+        <section class="comment">
+          <header>
+            <p>Written by {{author}}</p>
+          </header>
+
+          <p>{{message}}</p>
+        </section>
+      {{else}}
+      <p>No comments, be the first!</p>
+      {{/each}}
+    </section>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="_dream">
+    <article class="dream">
+      {{dream}}
+      <footer>
+        <p>{{pseudo}}</p>
+        <button {{action 'niceAction'}}>Nice ({{nice}})</button>
+        <button {{action 'boringAction'}}>Boring ({{boring}})</button>
+        {{#linkTo 'dream' this}}Open{{/linkTo}}
+      </footer>
+    </article>
   </script>
 
   <script src="js/libs/jquery-1.9.1.js"></script>
