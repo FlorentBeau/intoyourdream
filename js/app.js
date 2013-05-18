@@ -122,11 +122,11 @@ App.WriteController = Ember.ObjectController.extend({
 });
 
 App.DreamRoute = Ember.Route.extend({
-  setupController: function(controller, model) {
-    controller.set('fetchedComments', App.Comment.find({
-      dream_id: model.id
-    }));
-  }
+  // setupController: function(controller, model) {
+  //   controller.set('fetchedComments', App.Comment.find({
+  //     dream_id: model.id
+  //   }));
+  // }
 });
 
 App.DreamController = Ember.ObjectController.extend({
@@ -137,20 +137,12 @@ App.DreamController = Ember.ObjectController.extend({
     } else {
       this.set('errorComment', false);
 
-      this.get('model.comments').pushObject(App.Comment.createRecord({
-        dreamId: this.get('model.id'),
+      this.get('model').addComment({
         author: this.get('content.comment_author'),
         message: this.get('content.comment_message')
-      }));
+      });
 
-      this.get('model.transaction').commit();
-
-      var that = this;
-      setTimeout(function() {
-        that.set('fetchedComments', App.Comment.find({
-          dream_id: that.get('model.id')
-        }));
-      }, 500);
+      this.get('store').commit();
     }
   },
 
@@ -187,11 +179,18 @@ App.Dream = DS.Model.extend({
   no: DS.attr('number'),
   nice: DS.attr('number'),
   boring: DS.attr('number'),
-  comments: DS.hasMany('App.Comment')
+  comments: DS.hasMany('App.Comment'),
+  _version: DS.attr('number'),
+
+  addComment: function(defaults) {
+    var newComment = App.Comment.createRecord(defaults);
+    this.get('comments').pushObject(newComment);
+    this.set('_version', this.get('comments.length'));
+    return newComment;
+  }
 });
 
 App.Comment = DS.Model.extend({
-  dreamId: DS.attr('string'),
   author: DS.attr('string'),
   message: DS.attr('string')
 });
